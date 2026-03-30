@@ -1,0 +1,47 @@
+{
+  "name": "keymaster-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Akari Vault Keymaster - secure API key management",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "keymaster-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "keymaster",
+    "vault",
+    "api-key",
+    "security",
+    "hashicorp-vault",
+    "secret-management",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AInoAKARI/keymaster-mcp-server.git"
+  },
+  "homepage": "https://github.com/AInoAKARI/keymaster-mcp-server#readme",
+  "author": "Akari Hearts <aino-akari@ai-akari.ai>",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

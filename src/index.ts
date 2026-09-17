@@ -6,8 +6,8 @@ import { KeymasterClient } from "./keymaster.js";
 import { registerTools } from "./tools.js";
 
 const server = new McpServer({
-  name: "keymaster-mcp",
-  version: "0.1.0",
+  name: "akari-capability-gateway",
+  version: "0.2.0",
 });
 
 const client = KeymasterClient.fromEnv();

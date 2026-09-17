@@ -3,99 +3,44 @@ import { z } from "zod";
 import { KeymasterClient } from "./keymaster.js";
 
 export function registerTools(server: McpServer, client: KeymasterClient): void {
-  // ── get_api_key ──
   server.tool(
-    "get_api_key",
-    "Retrieve an API key from the Keymaster vault. Returns the secret value for the given service and key name.",
-    {
-      api_name: z
-        .string()
-        .describe("Service name (e.g. 'openai', 'groq', 'stripe')"),
-      key_name: z
-        .string()
-        .default("api_key")
-        .describe("Key field name (default: 'api_key')"),
-    },
-    async ({ api_name, key_name }) => {
+    "discover_capabilities",
+    "Discover actions this agent may use. Returns capability metadata only; never secrets.",
+    {},
+    async () => {
       try {
-        const value = await client.getApiKey(api_name, key_name);
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: JSON.stringify({ api_name, key_name, api_key: value }, null, 2),
-            },
-          ],
-        };
+        const capabilities = await client.discoverCapabilities();
+        return { content: [{ type: "text" as const, text: JSON.stringify({ capabilities }) }] };
       } catch (err) {
-        return {
-          isError: true,
-          content: [
-            { type: "text" as const, text: (err as Error).message },
-          ],
-        };
+        return { isError: true, content: [{ type: "text" as const, text: (err as Error).message }] };
       }
     }
   );
 
-  // ── list_api_keys ──
   server.tool(
-    "list_api_keys",
-    "List registered secret paths in the vault. Returns names only, not values. Requires VAULT_ADDR and VAULT_TOKEN env vars.",
+    "execute_capability",
+    "Execute an allowed action inside Keymaster. Credentials remain inside the gateway and are never returned to the agent.",
     {
-      path: z
-        .string()
-        .optional()
-        .describe("Sub-path to list (e.g. 'api_keys'). Leave empty for root."),
+      capability: z.string().min(1),
+      action: z.string().min(1),
+      input: z.record(z.unknown()).default({}),
     },
-    async ({ path }) => {
-      try {
-        const keys = await client.listKeys(path);
-        const lines = keys.map((k) =>
-          k.endsWith("/") ? `[dir]  ${k.replace(/\/$/, "")}` : `[key]  ${k}`
-        );
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: lines.length > 0 ? lines.join("\n") : "No keys found.",
-            },
-          ],
-        };
-      } catch (err) {
-        return {
-          isError: true,
-          content: [
-            { type: "text" as const, text: (err as Error).message },
-          ],
-        };
-      }
-    }
-  );
-
-  // ── check_key_health ──
-  server.tool(
-    "check_key_health",
-    "Check whether a specific API key exists and is retrievable from the vault.",
-    {
-      api_name: z
-        .string()
-        .describe("Service name (e.g. 'openai', 'groq', 'stripe')"),
-      key_name: z
-        .string()
-        .default("api_key")
-        .describe("Key field name (default: 'api_key')"),
-    },
-    async ({ api_name, key_name }) => {
-      const result = await client.checkKeyHealth(api_name, key_name);
+    async ({ capability, action, input }) => {
+      const result = await client.executeCapability(capability, action, input);
       return {
-        content: [
-          {
-            type: "text" as const,
-            text: JSON.stringify({ api_name, key_name, ...result }, null, 2),
-          },
-        ],
+        isError: !result.ok,
+        content: [{ type: "text" as const, text: JSON.stringify(result) }],
       };
+    }
+  );
+
+  server.tool(
+    "capability_health",
+    "Check the capability gateway or one named capability without reading its credential.",
+    { capability: z.string().optional() },
+    async ({ capability }) => {
+      const result = await client.capabilityHealth(capability);
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
     }
   );
 }

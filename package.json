@@ -1,7 +1,7 @@
 {
   "name": "keymaster-mcp-server",
-  "version": "0.1.0",
-  "description": "MCP server for Akari Vault Keymaster - secure API key management",
+  "version": "0.2.0",
+  "description": "AIﾉアカリ☆ capability gateway MCP: Vault-backed agent capabilities without normal-path secret exposure",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
@@ -9,7 +9,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "docs"
   ],
   "scripts": {
     "build": "tsc",
@@ -20,6 +21,8 @@
   "keywords": [
     "mcp",
     "keymaster",
+    "capability-gateway",
+    "agent-security",
     "vault",
     "api-key",
     "security",
